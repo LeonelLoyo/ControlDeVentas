@@ -301,47 +301,41 @@ class clienteVenta:
 		frameCrearVenta.grid(row = 0, column = 0, columnspan = 3, pady = 20)
 
 		#Diseño esctructura interna de la ventana
-		#ingresar cantidad de litros 
-		Label(frameCrearVenta, text = 'Cantidad de litros').grid(row = 0, column = 0)
-		self.litros = Entry(frameCrearVenta)
-		self.litros.focus()
-		self.litros.grid(row = 0 , column = 2)
 
-		"""		
-		#ingresar fecha del pedido/venta se hace con un string por comodidad del usuario (Peticion)
-		Label(frameCrearVenta, text = 'Fecha').grid(row = 1, column = 0)
-		self.fecha = Entry(frameCrearVenta)
-		self.fecha.grid(row = 1 , column = 2)
-		"""
-
-		#Ingresar deuda (deuda total de la venta)
-		Label(frameCrearVenta, text = 'Deuda').grid(row = 2, column = 0)
+		#Ingresar deuda (Se calcula automaticamente)
+		Label(frameCrearVenta, text = 'Deuda').grid(row = 0, column = 0)
 		self.deuda = Entry(frameCrearVenta)
-		self.deuda.grid(row = 2 , column = 2)
+		self.deuda.focus()
+		self.deuda.grid(row = 0 , column = 2)
 		#Boton genera una ventana par hacer el total  de la venta 
-		ttk.Button(frameCrearVenta, text = 'Calcular monto de venta', command = self.calculoVenta).grid(row = 2, column = 3)
+		ttk.Button(frameCrearVenta, text = 'Calcular monto de venta', command = self.calculoVenta).grid(row = 0, column = 3)
+
+		#ingresar la descripcion de la venta (SE realizara automaticamente de acuerdo a la compra)
+		Label(frameCrearVenta, text = 'Descripcion').grid(row = 1, column = 0)
+		self.descripcion = Entry(frameCrearVenta)
+		self.descripcion.grid(row = 1, column = 2)
 
 		#entrada especial que me genera una lista de valores predefinidos
-		Label(frameCrearVenta, text = 'Estado').grid(row = 3, column = 0)
+		Label(frameCrearVenta, text = 'Estado').grid(row = 2, column = 0)
 		self.estado = ttk.Combobox(frameCrearVenta)
 		self.estado = ttk.Combobox(frameCrearVenta, state="readonly")
 		self.estado["values"] = ["POR DESPACHAR", "ABIERTA"]
-		self.estado.grid(row = 3 , column = 2)
+		self.estado.grid(row = 2, column = 2)
 
 		#Boton de ventana emergente para seleccionar al cliente de una lista que viene de los datos de la BD
-		ttk.Button(frameCrearVenta, text = 'Seleccionar Comprador', command = self.seleccionarCliente).grid(row = 4, columnspan = 4, sticky = W + E )
+		ttk.Button(frameCrearVenta, text = 'Seleccionar Comprador', command = self.seleccionarCliente).grid(row = 3, columnspan = 4, sticky = W + E )
 		#Boton de la ventana emergente que toma los datos de la nueva venta 
-		ttk.Button(self.crearVentaWind, text = 'Aceptar', command = lambda: self.registrarVenta(self.litros.get(), self.deuda.get(), self.estado.get(), self.cedulaComprador.get(), self.nombreComprador.get() )).grid(row = 1, column = 2, sticky = W + E )
+		ttk.Button(self.crearVentaWind, text = 'Aceptar', command = lambda: self.registrarVenta(self.descripcion.get(), self.deuda.get(), self.estado.get(), self.cedulaComprador.get(), self.nombreComprador.get() )).grid(row = 1, column = 2, sticky = W + E )
 
 		#inresar cedula del ciente, se inserta atumaticamente desde el metodo obtenerClienteParametro()
-		Label(frameCrearVenta, text = 'Cedula').grid(row = 5, column = 0)
+		Label(frameCrearVenta, text = 'Cedula').grid(row = 4, column = 0)
 		self.cedulaComprador = Entry(frameCrearVenta)
-		self.cedulaComprador.grid(row = 5 , column = 2)	
+		self.cedulaComprador.grid(row = 4, column = 2)	
 
 		#inresar nombre del ciente, se inserta atumaticamente desde el metodo obtenerClienteParametro()
-		Label(frameCrearVenta, text = 'Nombre').grid(row = 6, column = 0)
+		Label(frameCrearVenta, text = 'Nombre').grid(row =5, column = 0)
 		self.nombreComprador = Entry(frameCrearVenta)
-		self.nombreComprador.grid(row = 6 , column = 2)	
+		self.nombreComprador.grid(row = 5, column = 2)	
 
 	#Ventana con la lista de clientes registrados para facilitar el tomar los datos y casar un cliente con un pedido/venta	
 	def seleccionarCliente(self):
@@ -426,21 +420,24 @@ class clienteVenta:
 		cClarap.insert(0, '0')
 		cClarap.grid(row = 5, column = 3)
 
-		ttk.Button(self.calculoWind, text = 'Calcular', command = lambda: self.calcular(float(ronl.get()), float(ronp.get()), float(anisl.get()), float(anisp.get()), float(cClaral.get()), float(cClarap.get()))).grid(row = 6, column = 4, sticky = W + E)
+		ttk.Button(self.calculoWind, text = 'Calcular', command = lambda: self.calcular(int(ronl.get()), float(ronp.get()), int(anisl.get()), float(anisp.get()), int(cClaral.get()), float(cClarap.get()))).grid(row = 6, column = 4, sticky = W + E)
 
 
-
+	#se calcula el monto total de la venta y se inserta en el campo deuda y se crea una descripcion de la venta 
+	#Tanto el total como la descripcion se insertan de una vez en los campos correspondientes	
 	def calcular(self, ronl, ronp, anisl, anisp, cClaral, cClarap):	
 		totalVenta = (ronl*ronp)+(anisl*anisp)+(cClaral*cClarap) 
 		self.deuda.insert(0, totalVenta)
 		self.calculoWind.destroy()
 
+		#Realizar una descripcion de la venta 
+		descripcion = 'Ron:'+str(1*ronl)+' / '+'Anis:'+str(1*anisl)+' / '+'CC:'+str(1*cClaral)
+		self.descripcion.insert(0, descripcion)
 
 
 	#Toma todos los datos captados anteriormente para insertar un nuevo registro de venta en la BD	
-	def registrarVenta(self, litros, deuda, estado, cedulaComprador, nombreComprador ):
+	def registrarVenta(self, descripcion, deuda, estado, cedulaComprador, nombreComprador ):
 		
-
 		#Obtengo el id del cleinte enla BD para asignar mi clave foranea
 		idquery = 'SELECT id_cliente FROM cliente WHERE cedula = ? AND nombre = ?'
 		para = (cedulaComprador, nombreComprador)
@@ -451,10 +448,10 @@ class clienteVenta:
 		#insercion de la venta en la BD
 		query = 'INSERT INTO venta VALUES(NULL, ?, ?, ?, ?, ?)'
 		parametros =(int(id_cliente),
-						int(litros),
+						descripcion,
 						estado,
 						fecha,
-						int(deuda))
+						float(deuda))
 		self.runQuery(query, parametros)
 		self.crearVentaWind.destroy()
 
@@ -472,7 +469,7 @@ class clienteVenta:
 		self.tablaVentaCerrada.heading('#0', text = 'Identificador', anchor = CENTER)
 		self.tablaVentaCerrada.heading('#1', text = 'Cedula', anchor = CENTER)
 		self.tablaVentaCerrada.heading('#2', text = 'Nombre', anchor = CENTER)
-		self.tablaVentaCerrada.heading('#3', text = 'Litros', anchor = CENTER)
+		self.tablaVentaCerrada.heading('#3', text = 'Descripcion', anchor = CENTER)
 		self.tablaVentaCerrada.heading('#4', text = 'Fecha', anchor = CENTER)
 		self.tablaVentaCerrada.heading('#5', text = 'Deuda', anchor = CENTER)
 		self.tablaVentaCerrada.heading('#6', text = 'Estado', anchor = CENTER)
@@ -481,7 +478,7 @@ class clienteVenta:
 	#llenado de la tabla de ventas cerradas	
 	def obtenerVentasCerradas(self):	
 		#Consulta para traer todas las ventas en estado CERRADA
-		query = 'SELECT v.id_venta, c.cedula, c.nombre, v.cant_ltr, v.fecha_venta, v.deuda, v.estado FROM cliente AS c JOIN venta AS v ON c.id_cliente = v.id_clientev WHERE v.estado = ?'
+		query = 'SELECT v.id_venta, c.cedula, c.nombre, v.descripcion, v.fecha_venta, v.deuda, v.estado FROM cliente AS c JOIN venta AS v ON c.id_cliente = v.id_clientev WHERE v.estado = ?'
 		parametro = ('CERRADA',)
 		resul = self.runQuery(query, parametro)
 
@@ -511,7 +508,7 @@ class clienteVenta:
 		self.tablaVentaPorDespachar.heading('#0', text = 'Identificador', anchor = CENTER)		
 		self.tablaVentaPorDespachar.heading('#1', text = 'Cedula', anchor = CENTER)
 		self.tablaVentaPorDespachar.heading('#2', text = 'Nombre', anchor = CENTER)
-		self.tablaVentaPorDespachar.heading('#3', text = 'Litros', anchor = CENTER)
+		self.tablaVentaPorDespachar.heading('#3', text = 'Descripcion', anchor = CENTER)
 		self.tablaVentaPorDespachar.heading('#4', text = 'Fecha', anchor = CENTER)
 		self.tablaVentaPorDespachar.heading('#5', text = 'Deuda', anchor = CENTER)
 		self.tablaVentaPorDespachar.heading('#6', text = 'Estado', anchor = CENTER)	
@@ -520,7 +517,7 @@ class clienteVenta:
 	#llenado de la tabla de ventas por despachar
 	def obtenerVentasPorDespachar(self):	
 		#Consulta para traer todas las ventas en estado POR DESPACHAR
-		query = 'SELECT v.id_venta, c.cedula, c.nombre, v.cant_ltr, v.fecha_venta, v.deuda, v.estado FROM cliente AS c JOIN venta AS v ON c.id_cliente = v.id_clientev WHERE v.estado = ?'
+		query = 'SELECT v.id_venta, c.cedula, c.nombre, v.descripcion, v.fecha_venta, v.deuda, v.estado FROM cliente AS c JOIN venta AS v ON c.id_cliente = v.id_clientev WHERE v.estado = ?'
 		parametro = ('POR DESPACHAR',)
 		resul = self.runQuery(query, parametro)
 
@@ -550,7 +547,7 @@ class clienteVenta:
 		self.tableVentaAbierta.heading('#0', text = 'Identificador', anchor = CENTER)
 		self.tableVentaAbierta.heading('#1', text = 'Cedula', anchor = CENTER)
 		self.tableVentaAbierta.heading('#2', text = 'Nombre', anchor = CENTER)
-		self.tableVentaAbierta.heading('#3', text = 'Litros', anchor = CENTER)
+		self.tableVentaAbierta.heading('#3', text = 'Descripcion', anchor = CENTER)
 		self.tableVentaAbierta.heading('#4', text = 'Fecha', anchor = CENTER)
 		self.tableVentaAbierta.heading('#5', text = 'Deuda', anchor = CENTER)
 		self.tableVentaAbierta.heading('#6', text = 'Estado', anchor = CENTER)	
@@ -559,7 +556,7 @@ class clienteVenta:
 	#llenado de la tabla de ventas abiertas
 	def obtenerVentasAbiertas(self):	
 		#Consulta para traer todas las ventas en estado ABIERTAS
-		query = 'SELECT v.id_venta, c.cedula, c.nombre, v.cant_ltr, v.fecha_venta, v.deuda, v.estado FROM cliente AS c JOIN venta AS v ON c.id_cliente = v.id_clientev WHERE v.estado = ?'
+		query = 'SELECT v.id_venta, c.cedula, c.nombre, v.descripcion, v.fecha_venta, v.deuda, v.estado FROM cliente AS c JOIN venta AS v ON c.id_cliente = v.id_clientev WHERE v.estado = ?'
 		parametro = ('ABIERTA',)
 		resul = self.runQuery(query, parametro)
 
@@ -622,7 +619,7 @@ class clienteVenta:
 		deuda = resul.fetchone()[0]
 
 		#Calculo la nueva deuda luego del abono
-		newDeuda = int(deuda) - int(abono)
+		newDeuda = float(deuda) - float(abono)
 
 		#Este condicional me permite ademas de actuaizar la deuda en la BD, si esta es 0 (Se paga la totalidad de la venta)
 		#Se cambia d euna vez el estado d ela venta a CERRADA
@@ -682,6 +679,7 @@ class clienteVenta:
 		self.cambiarEstadoWind.destroy()
 		self.obtenerVentasPorDespachar()
 
+		#Ventana de aviso y su contenido
 		self.avisoEditar = Toplevel()
 		self.avisoEditar.title("AVISO!")	
 
