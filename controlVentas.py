@@ -6,6 +6,7 @@ Se comienza la gestion de ventas
 from tkinter import ttk
 from tkinter import *
 import sqlite3
+from datetime import datetime
 
 class clienteVenta:
 
@@ -280,9 +281,10 @@ class clienteVenta:
 
 		#Botones
 		ttk.Button(self.ventaWind, text = 'Crear nueva venta', command = self.crearVenta).grid(row = 0, columnspan = 2, sticky = W + E)
-		ttk.Button(self.ventaWind, text = 'Consultar ventas cerradas', command = self.ventasCerradas).grid(row = 1, columnspan = 2, sticky = W + E)
+		ttk.Button(self.ventaWind, text = 'Consultar ventas abiertas', command =self.ventasAbiertas).grid(row = 1, columnspan = 2, sticky = W + E)
 		ttk.Button(self.ventaWind, text = 'Consultar ventas por despachar', command = self.ventasPorDespachar).grid(row = 2, columnspan = 2, sticky = W + E)
-		ttk.Button(self.ventaWind, text = 'Consultar ventas abiertas', command =self.ventasAbiertas).grid(row = 3, columnspan = 2, sticky = W + E)
+		ttk.Button(self.ventaWind, text = 'Consultar ventas cerradas', command = self.ventasCerradas).grid(row = 3, columnspan = 2, sticky = W + E)
+		
 
 	#Crea un nuevo registro de venta. utiliza los siguientes metodos
 	#seleccionarCliente()
@@ -305,27 +307,31 @@ class clienteVenta:
 		self.litros.focus()
 		self.litros.grid(row = 0 , column = 2)
 
+		"""		
 		#ingresar fecha del pedido/venta se hace con un string por comodidad del usuario (Peticion)
 		Label(frameCrearVenta, text = 'Fecha').grid(row = 1, column = 0)
 		self.fecha = Entry(frameCrearVenta)
 		self.fecha.grid(row = 1 , column = 2)
+		"""
 
 		#Ingresar deuda (deuda total de la venta)
 		Label(frameCrearVenta, text = 'Deuda').grid(row = 2, column = 0)
 		self.deuda = Entry(frameCrearVenta)
 		self.deuda.grid(row = 2 , column = 2)
+		#Boton genera una ventana par hacer el total  de la venta 
+		ttk.Button(frameCrearVenta, text = 'Calcular monto de venta', command = self.calculoVenta).grid(row = 2, column = 3)
 
 		#entrada especial que me genera una lista de valores predefinidos
 		Label(frameCrearVenta, text = 'Estado').grid(row = 3, column = 0)
 		self.estado = ttk.Combobox(frameCrearVenta)
 		self.estado = ttk.Combobox(frameCrearVenta, state="readonly")
-		self.estado["values"] = ["ABIERTA","CERRADA","POR DESPACHAR"]
+		self.estado["values"] = ["POR DESPACHAR", "ABIERTA"]
 		self.estado.grid(row = 3 , column = 2)
 
 		#Boton de ventana emergente para seleccionar al cliente de una lista que viene de los datos de la BD
 		ttk.Button(frameCrearVenta, text = 'Seleccionar Comprador', command = self.seleccionarCliente).grid(row = 4, columnspan = 4, sticky = W + E )
 		#Boton de la ventana emergente que toma los datos de la nueva venta 
-		ttk.Button(self.crearVentaWind, text = 'Aceptar', command = lambda: self.registrarVenta(self.litros.get(), self.fecha.get(), self.deuda.get(), self.estado.get(), self.cedulaComprador.get(), self.nombreComprador.get() )).grid(row = 1, column = 2, sticky = W + E )
+		ttk.Button(self.crearVentaWind, text = 'Aceptar', command = lambda: self.registrarVenta(self.litros.get(), self.deuda.get(), self.estado.get(), self.cedulaComprador.get(), self.nombreComprador.get() )).grid(row = 1, column = 2, sticky = W + E )
 
 		#inresar cedula del ciente, se inserta atumaticamente desde el metodo obtenerClienteParametro()
 		Label(frameCrearVenta, text = 'Cedula').grid(row = 5, column = 0)
@@ -382,15 +388,66 @@ class clienteVenta:
 
 		self.selecCliente.destroy()
 
+	#ventana para obtener los datos especificos de la venta y posteriormente hacer el calculo
+	def calculoVenta(self):
+		self.calculoWind = Toplevel()
+		self.calculoWind.title('Calculadora')
+
+		#Ron
+		Label(self.calculoWind, text = 'Ron').grid(row = 0, column = 0)
+		Label(self.calculoWind, text = 'litros').grid(row = 1, column = 0)
+		Label(self.calculoWind, text = 'Precio').grid(row = 1, column = 2)
+		ronl = Entry(self.calculoWind)
+		ronl.insert(0, '0')
+		ronl.grid(row = 1, column = 1)
+		ronp = Entry(self.calculoWind)
+		ronp.insert(0, '0')
+		ronp.grid(row = 1, column = 3)
+
+		#Anis
+		Label(self.calculoWind, text = 'Anis').grid(row = 2, column = 0)
+		Label(self.calculoWind, text = 'litros').grid(row = 3, column = 0)
+		Label(self.calculoWind, text = 'Precio').grid(row = 3, column = 2)
+		anisl = Entry(self.calculoWind)
+		anisl.insert(0, '0')
+		anisl.grid(row = 3, column = 1)
+		anisp = Entry(self.calculoWind)
+		anisp.insert(0, '0')
+		anisp.grid(row = 3, column = 3)
+
+		#canaClara
+		Label(self.calculoWind, text = 'Ron').grid(row = 4, column = 0)
+		Label(self.calculoWind, text = 'litros').grid(row = 5, column = 0)
+		Label(self.calculoWind, text = 'Precio').grid(row = 5, column = 2)
+		cClaral = Entry(self.calculoWind)
+		cClaral.insert(0, '0')
+		cClaral.grid(row = 5, column = 1)
+		cClarap = Entry(self.calculoWind)
+		cClarap.insert(0, '0')
+		cClarap.grid(row = 5, column = 3)
+
+		ttk.Button(self.calculoWind, text = 'Calcular', command = lambda: self.calcular(float(ronl.get()), float(ronp.get()), float(anisl.get()), float(anisp.get()), float(cClaral.get()), float(cClarap.get()))).grid(row = 6, column = 4, sticky = W + E)
+
+
+
+	def calcular(self, ronl, ronp, anisl, anisp, cClaral, cClarap):	
+		totalVenta = (ronl*ronp)+(anisl*anisp)+(cClaral*cClarap) 
+		self.deuda.insert(0, totalVenta)
+		self.calculoWind.destroy()
+
+
+
 	#Toma todos los datos captados anteriormente para insertar un nuevo registro de venta en la BD	
-	def registrarVenta(self, litros, fecha, deuda, estado, cedulaComprador, nombreComprador ):
+	def registrarVenta(self, litros, deuda, estado, cedulaComprador, nombreComprador ):
 		
+
 		#Obtengo el id del cleinte enla BD para asignar mi clave foranea
 		idquery = 'SELECT id_cliente FROM cliente WHERE cedula = ? AND nombre = ?'
 		para = (cedulaComprador, nombreComprador)
 		idresul = self.runQuery(idquery, para)
 		id_cliente = idresul.fetchone()[0]
 
+		fecha = self.obtenerFeha()
 		#insercion de la venta en la BD
 		query = 'INSERT INTO venta VALUES(NULL, ?, ?, ?, ?, ?)'
 		parametros =(int(id_cliente),
@@ -479,9 +536,7 @@ class clienteVenta:
 	def cerrarPorDespachar(self):
 		self.ventaPorDespacharWind.destroy()
 
-	#Ventana para consultar las ventas abiertas y vaciarlas en una tabla
-	#IMPORTANTE!!!! Esta tabla es lijeramente distinta a las 2 anteriores ya que necesito el id de la venta para su posterior actualizacion
-	#Se quita la columna alias que si esta presente en el resto de las tablas 	
+	#Ventana para consultar las ventas abiertas y vaciarlas en una tabla	
 	def ventasAbiertas(self):
 		self.ventaAbiertaWind = Toplevel()
 		self.ventaAbiertaWind.title("Ventas Abiertas")
@@ -578,8 +633,9 @@ class clienteVenta:
 			self.abonarWind.destroy()
 			self.obtenerVentasAbiertas()
 		else:
-			query = 'UPDATE venta SET deuda = ?, estado = ? WHERE id_venta = ? '
-			parametros = (newDeuda, 'CERRADA',  id)
+			fecha = self.obtenerFeha()
+			query = 'UPDATE venta SET deuda = ?, estado = ?, fecha_venta = ? WHERE id_venta = ? '
+			parametros = (newDeuda, 'CERRADA', fecha, id)
 			self.runQuery(query, parametros)
 			self.abonarWind.destroy()
 			self.obtenerVentasAbiertas()
@@ -591,12 +647,12 @@ class clienteVenta:
 			Label(self.aviso, text = 'EL cliente pago la totalidad de la deuda, La venta fue movida a "Ventas cerradas"').grid(row = 0, column = 0)	
 			ttk.Button(self.aviso, text = 'OK', command = self.cerrarAviso).grid(row = 1, column = 2)
 
-	#Funcionalidad del boton de la ventana de aviso que informa que la venta se movio a "Ventas cerradas"		
+	#Funcionalidad del boton de la ventana de aviso que informa que la venta se movio a la seccion seleccionada 		
 	def cerrarAviso(self):
 		self.aviso.destroy()	
 
 
-		
+	#Cambiar una venta por despachar a cerrada o abierta 	
 	def cambiarEstadoVenta(self):
 		try:
 			int(self.tablaVentaPorDespachar.item(self.tablaVentaPorDespachar.selection())['text'])
@@ -608,20 +664,20 @@ class clienteVenta:
 		self.cambiarEstadoWind = Toplevel()
 		self.cambiarEstadoWind.title('Cambiar Estado de la venta')	
 
-
+		#Boton pata tomar la seleccion del cliente 
 		ttk.Button(self.cambiarEstadoWind, text = 'Aceptar', command = lambda: self.editarEstado(self.estado.get(), idVenta)).grid(row = 2, column = 2)
 
 		Label(self.cambiarEstadoWind, text = 'Estado').grid(row = 0, column = 0)
-		self.estado = ttk.Combobox(self.cambiarEstadoWind)
 		self.estado = ttk.Combobox(self.cambiarEstadoWind, state="readonly")
-		self.estado["values"] = ["ABIERTA","CERRADA","POR DESPACHAR"]
+		self.estado["values"] = ["ABIERTA","CERRADA"]
 		self.estado.grid(row = 1 , column = 0)	
 
-
+	#Toma los valores dados en cambiarEstadoVenta y los aplica en la bd	
 	def editarEstado(self, estado, id):
 
-		query = 'UPDATE venta SET estado = ? WHERE id_venta = ?'
-		parametros = (estado, id)
+		fecha = self.obtenerFeha()
+		query = 'UPDATE venta SET estado = ?, fecha_venta = ? WHERE id_venta = ?'
+		parametros = (estado, fecha, id)
 		self.runQuery(query, parametros)
 		self.cambiarEstadoWind.destroy()
 		self.obtenerVentasPorDespachar()
@@ -629,20 +685,12 @@ class clienteVenta:
 		self.avisoEditar = Toplevel()
 		self.avisoEditar.title("AVISO!")	
 
-		Label(self.avisoEditar, text = 'La venta fue movida a "Ventas por despachar').grid(row = 0, column = 0)	
+		Label(self.avisoEditar, text = 'La venta fue movida a "{}"'.format(estado)).grid(row = 0, column = 0)	
 		ttk.Button(self.avisoEditar, text = 'OK', command = self.cerrarAvisoEditar).grid(row = 1, column = 2)
 
+	#Funcionalidad del boton para cerrar la ventana emergente 	
 	def cerrarAvisoEditar(self):
-		self.avisoEditar.destroy()	
-
-
-#Mensajes para el usuario (Modulo cliente)
-#mensaje de error
-self.mensajeError = Label(self.clienteWind, text = '', fg = 'red')
-self.mensajeError.grid(row = 2, column = 0, columnspan = 2, sticky = W + E)
-#Mensaje de accion exitosa
-self.mensajeExito = Label(self.clienteWind, text = '', fg = 'blue')
-self.mensajeExito.grid(row = 3, column = 0, columnspan = 2, sticky = W + E)			
+		self.avisoEditar.destroy()			
 
 #++++++++++++++++++++++++++++++++++++++     Funciones en comun para ambas gestiones++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -654,8 +702,10 @@ self.mensajeExito.grid(row = 3, column = 0, columnspan = 2, sticky = W + E)
 		    result = cursor.execute(query, parametros)
 		    conn.commit()
 		return result	
-
-
+	#Me da la fecha actual del sistema para llevar mas facilmente el control de las ventas 	
+	def obtenerFeha(self):
+		fecha = datetime.now()
+		return str(fecha.day)+'/'+str(fecha.month)+'/'+str(fecha.year)
 
 if __name__ == '__main__':
 	window = Tk()
