@@ -1,8 +1,19 @@
 """
+Desarrollador: Leonel Eduardo Loyo Zarraga
+Documento de identidad: 22.424.104
+
+Proyecto: creacion de un sistema para la gestion de clientes y ventas 
+Ultima modificacion: 01/10/2020
+Status: version 1.0 terminada y 100% funcional
+
+
+Consideraciones:
 
 NOTA IMPORTANTE: Las ventas abiertas de cara al cliente y en la BD se llaman DESPACHADAS pero para fines de codigo
 es abiertas (Variables, metodos y demas estan nombrados en base a "ABIERTA")
 
+NOTA IMPORTANTE: Todo los los mensajes al usuario que tiene que ver con el estado de la venta, de cara al usuario se llama
+"Estatus". A nivel de codigo y BD se maneja como estado.
 """
 
 import tkinter as tk
@@ -24,7 +35,7 @@ class clienteVenta:
 
 		#midnight blue
 		frameMain = LabelFrame(self.wind, text = 'Bienvenido al menu principal')
-		frameMain.grid(row = 3, column = 3, columnspan = 3, pady = 20)
+		frameMain.place(x =90, y = 40 )
 		frameMain['bg'] = '#8b9dc3'
 
 		#Esta funcion verifica si hay ventas en mora para darle aviso al usuario
@@ -122,13 +133,13 @@ class clienteVenta:
 
 		#Condicionales para validar las entradas de los campos sensibles 
 		if self.validacionCliente() == 'nombre':
-			self.mensajeError['text'] = 'Debe ingresar un nombre valido para poder realizar el registro'
+			self.mensajeError['text'] = '¡Debe ingresar un nombre valido para poder realizar el registro!'
 
 		elif self.validacionCliente() == 'cedula':
-			self.mensajeError['text'] = 'La cedula debe ser un numero'
+			self.mensajeError['text'] = '¡La cedula debe ser un numero!'
 
 		elif self.validacionCliente() == 'telefono':
-			self.mensajeError['text'] = 'El telefono debe ser un numero'
+			self.mensajeError['text'] = '¡El telefono debe ser un numero!'
 
 		else:		
 			query = 'INSERT INTO cliente VALUES(NULL, ?, ?, ?, ?, ?, ?)'
@@ -139,7 +150,7 @@ class clienteVenta:
 							int(self.telefono.get()), 
 							self.direccion.get())
 			self.runQuery(query, parametros)
-			self.mensajeExito['text'] = 'Cliente {} registrado satisfactoriamente'.format(self.nombre.get())
+			self.mensajeExito['text'] = '¡Cliente {} registrado exitosamente!'.format(self.nombre.get())
 			self.cedula.delete(0, END)
 			self.nombre.delete(0, END)
 			self.apellido.delete(0, END)
@@ -157,14 +168,15 @@ class clienteVenta:
 		try:
 			int(self.tablaCliente.item(self.tablaCliente.selection())['text'])
 		except :	
-			self.mensajeError['text'] = 'Por favor selecciona el cliente a eliminar'
+			self.mensajeError['text'] = '¡Por favor seleccione el cliente a eliminar!'
 			return
+
 		self.mensajeError['text'] = ''
 		self.mensajeExito['text'] = ''
 		cedula = self.tablaCliente.item(self.tablaCliente.selection())['text']
 		query = 'DELETE FROM cliente where cedula = ?'
 		self.runQuery(query, (cedula,))
-		self.mensajeExito['text'] = 'El cliente fue borrado exitosamente'
+		self.mensajeExito['text'] = '¡El cliente fue borrado exitosamente!'
 		self.obtenerClientes()
 
 	#funcion se usara para editar uno o campos de un cliente	
@@ -176,7 +188,7 @@ class clienteVenta:
 		try:
 			int(self.tablaCliente.item(self.tablaCliente.selection())['text'])
 		except :	
-			self.mensajeError['text'] = 'Por favor selecciona un cliente para Editar'
+			self.mensajeError['text'] = '¡Por favor seleccione el cliente a editar!'
 			return
 
 		#Obtengo lo valores viejos para mostrarlos en la interfaz 	
@@ -261,7 +273,7 @@ class clienteVenta:
 		query = 'UPDATE cliente SET cedula = ?, nombre = ?, apellido = ?, alias = ?, telefono = ?, direccion = ? WHERE cedula = ? AND nombre = ?'
 		self.runQuery(query, parametros)
 		self.editarclienteWind.destroy()
-		self.mensajeExito['text'] = 'El cliente fue editado exitosamente'
+		self.mensajeExito['text'] = '¡El cliente fue editado exitosamente!'
 		self.obtenerClientes()
 
 
@@ -307,8 +319,8 @@ class clienteVenta:
 		self.ventaWind.geometry('400x200')
 		self.ventaWind['bg'] = '#3b5998'
 
-		frameGestionVenta = LabelFrame(self.ventaWind, text = 'Bienvenido al menu principal')
-		frameGestionVenta.grid(row = 3, column = 3, columnspan = 3, pady = 20)
+		frameGestionVenta = LabelFrame(self.ventaWind, text = 'Bienvenido al menu principal de ventas')
+		frameGestionVenta.place(x= 90, y= 40)
 		frameGestionVenta['bg'] = '#8b9dc3'
 		#Botones
 		tk.Button(frameGestionVenta, text = 'Crear nueva venta', bg = '#f7f7f7', command = self.crearVenta).grid(row = 0, columnspan = 2, sticky = W + E)
@@ -350,7 +362,7 @@ class clienteVenta:
 		self.descripcion.grid(row = 2, column = 1)
 
 		#entrada especial que me genera una lista de valores predefinidos
-		Label(frameCrearVenta, text = 'Estado', bg = '#8b9dc3').grid(row = 3, column = 0)
+		Label(frameCrearVenta, text = 'Estatus', bg = '#8b9dc3').grid(row = 3, column = 0)
 		self.estado = ttk.Combobox(frameCrearVenta)
 		self.estado = ttk.Combobox(frameCrearVenta, state="readonly")
 		self.estado["values"] = ["POR DESPACHAR", "DESPACHADA"]
@@ -406,9 +418,13 @@ class clienteVenta:
 
 	#Carga en las variables los datos necesarios del cliente para la posterior insercion de la venta en la BD		
 	def obtenerClienteParametro(self):
+		#Valida que haya un cliente seleccionado (listo)
 		try:
 			int(self.tablaSelecCliente.item(self.tablaSelecCliente.selection())['text'])
-		except :	
+		except :
+			self.mensajeError = Label(self.selecCliente, text = '¡Seleccione un cliente!', fg = 'black')
+			self.mensajeError.grid(row = 1, column = 0, columnspan = 2, sticky = W + E)
+			self.mensajeError['bg'] = '#3b5998'	
 			return
 
 		self.cedulaCliente = self.tablaSelecCliente.item(self.tablaSelecCliente.selection())['text']	
@@ -480,12 +496,37 @@ class clienteVenta:
 
 	#Toma todos los datos captados anteriormente para insertar un nuevo registro de venta en la BD	
 	def registrarVenta(self, descripcion, deuda, estado, cedulaComprador, nombreComprador ):
-		
+
+		#valida que se ingrese un monto y un cliente para poder registrar una venta (listo)
+		try:
+			float(deuda)
+		except:
+			self.mensajeError = Label(self.crearVentaWind, text = '¡Recuerde ingresar un monto!', fg = 'black')
+			self.mensajeError.grid(row = 3, column = 0, columnspan = 2, sticky = W + E)
+			self.mensajeError['bg'] = '#3b5998'			
+			return
+
+		#Valida que se haya ingresado un status valido (listo)	
+		if estado == '':
+			self.mensajeError = Label(self.crearVentaWind, text = '¡Recuerde ingresar El estatus de la venta!', fg = 'black')
+			self.mensajeError.grid(row = 3, column = 0, columnspan = 2, sticky = W + E)
+			self.mensajeError['bg'] = '#3b5998'			
+			return
+
 		#Obtengo el id del cleinte enla BD para asignar mi clave foranea
 		idquery = 'SELECT id_cliente FROM cliente WHERE cedula = ? AND nombre = ?'
 		para = (cedulaComprador, nombreComprador)
 		idresul = self.runQuery(idquery, para)
-		id_cliente = idresul.fetchone()[0]
+
+		#valida que se seleccione un cliente para poder registrar la venta (lista)
+		try:
+			id_cliente = idresul.fetchone()[0]
+		except:
+			self.mensajeError = Label(self.crearVentaWind, text = '¡Recuerde ingresar un cliente!', fg = 'black')
+			self.mensajeError.grid(row = 3, column = 0, columnspan = 2, sticky = W + E)
+			self.mensajeError['bg'] = '#3b5998'			
+			return			
+			
 
 		fecha = self.obtenerFeha()
 		#insercion de la venta en la BD
@@ -518,7 +559,7 @@ class clienteVenta:
 		self.tablaVentaCerrada.heading('#3', text = 'Descripcion', anchor = CENTER)
 		self.tablaVentaCerrada.heading('#4', text = 'Fecha', anchor = CENTER)
 		self.tablaVentaCerrada.heading('#5', text = 'Deuda', anchor = CENTER)
-		self.tablaVentaCerrada.heading('#6', text = 'Estado', anchor = CENTER)
+		self.tablaVentaCerrada.heading('#6', text = 'Estatus', anchor = CENTER)
 		self.obtenerVentasCerradas()
 
 	#llenado de la tabla de ventas cerradas	
@@ -543,7 +584,7 @@ class clienteVenta:
 		self.ventaPorDespacharWind['bg'] = '#3b5998'
 
 		tk.Button(self.ventaPorDespacharWind, text = 'Salir', bg = '#eb919a', command = lambda: self.ventaPorDespacharWind.destroy()).grid(row = 9, column = 5, sticky = W + E)	
-		tk.Button(self.ventaPorDespacharWind, text = 'Cambiar estado de la venta', bg = '#ccd2e6', command = self.cambiarEstadoVenta).grid(row = 9, column = 4, sticky = W + E)
+		tk.Button(self.ventaPorDespacharWind, text = 'Cambiar Estatus de la venta', bg = '#ccd2e6', command = self.cambiarEstadoVenta).grid(row = 9, column = 4, sticky = W + E)
 		
 		#Tema de la tabla
 		s = ttk.Style()
@@ -558,7 +599,7 @@ class clienteVenta:
 		self.tablaVentaPorDespachar.heading('#3', text = 'Descripcion', anchor = CENTER)
 		self.tablaVentaPorDespachar.heading('#4', text = 'Fecha', anchor = CENTER)
 		self.tablaVentaPorDespachar.heading('#5', text = 'Deuda', anchor = CENTER)
-		self.tablaVentaPorDespachar.heading('#6', text = 'Estado', anchor = CENTER)	
+		self.tablaVentaPorDespachar.heading('#6', text = 'Estatus', anchor = CENTER)	
 		self.obtenerVentasPorDespachar()
 
 	#llenado de la tabla de ventas por despachar
@@ -599,7 +640,7 @@ class clienteVenta:
 		self.tableVentaAbierta.heading('#3', text = 'Descripcion', anchor = CENTER)
 		self.tableVentaAbierta.heading('#4', text = 'Fecha', anchor = CENTER)
 		self.tableVentaAbierta.heading('#5', text = 'Deuda', anchor = CENTER)
-		self.tableVentaAbierta.heading('#6', text = 'Estado', anchor = CENTER)	
+		self.tableVentaAbierta.heading('#6', text = 'Estatus', anchor = CENTER)	
 		self.obtenerVentasAbiertas()
 
 	#llenado de la tabla de ventas abiertas
@@ -620,9 +661,13 @@ class clienteVenta:
 
 	#Crea una ventana comoda para realizar un abono a una venta seleccionada	
 	def abonar(self):
+		#Valid que haya una venta seleccionada para hacer un abono (lista)
 		try:
 			int(self.tableVentaAbierta.item(self.tableVentaAbierta.selection())['text'])
-		except :	
+		except:	
+			self.mensajeError = Label(self.ventaAbiertaWind, text = '¡Seleccione una venta!', fg = 'black')
+			self.mensajeError.grid(row = 9, column = 0, columnspan = 2, sticky = W + E)
+			self.mensajeError['bg'] = '#3b5998'	
 			return
 
 		#Obtengo la deuda para mostrarla en la interfaz y otros parametros convenientes	
@@ -658,6 +703,14 @@ class clienteVenta:
 
 	#SE realizan los cambios en la deuda en la BD	
 	def editarDeuda(self, abono, id):
+		#Validacion de que siempre haya un valor valido en abono (listo)
+		try:
+			float(abono)
+		except:
+			self.mensajeError = Label(self.abonarWind, text = '¡Ingrese un monto valido!', fg = 'black')
+			self.mensajeError.grid(row = 2, column = 0, columnspan = 2, sticky = W + E)
+			self.mensajeError['bg'] = '#3b5998'
+			return
 
 		#Obtener deuda actual
 		query = 'SELECT deuda FROM venta WHERE id_venta = ? '
@@ -695,25 +748,30 @@ class clienteVenta:
 
 	#Cambiar una venta por despachar a cerrada o abierta 	
 	def cambiarEstadoVenta(self):
+		#Valida que haya algo seleccionado en la ventana de venta para cambiar su estado (listo)
 		try:
 			int(self.tablaVentaPorDespachar.item(self.tablaVentaPorDespachar.selection())['text'])
-		except :	
+		except :
+			self.mensajeError = Label(self.ventaPorDespacharWind, text = '¡Seleccione una venta!', fg = 'black')
+			self.mensajeError.grid(row = 9, column = 0, columnspan = 2, sticky = W + E)
+			self.mensajeError['bg'] = '#3b5998'	
 			return
 
 		idVenta = self.tablaVentaPorDespachar.item(self.tablaVentaPorDespachar.selection())['text']
 
 		self.cambiarEstadoWind = Toplevel()
-		self.cambiarEstadoWind.title('Cambiar Estado de la venta')	
+		self.cambiarEstadoWind.title('Cambiar Estatus de la venta')	
+		self.cambiarEstadoWind.geometry('400x200')
 		self.cambiarEstadoWind['bg'] = '#3b5998'
 
-		frameCambiarEstadoWind = LabelFrame(self.cambiarEstadoWind, text ='Estado')
-		frameCambiarEstadoWind.grid(row = 0, column = 0, columnspan = 3, pady = 20)
+		frameCambiarEstadoWind = LabelFrame(self.cambiarEstadoWind, text ='Estatus')
+		frameCambiarEstadoWind.place(x=110, y=50)
 		frameCambiarEstadoWind['bg'] = '#8b9dc3'
 
 		#Boton pata tomar la seleccion del cliente 
-		tk.Button(self.cambiarEstadoWind, text = 'Aceptar', bg = '#ccd2e6', command = lambda: self.editarEstado(self.estado.get(), idVenta)).grid(row = 2, column = 2)
+		tk.Button(self.cambiarEstadoWind, text = 'Aceptar', bg = '#ccd2e6', command = lambda: self.editarEstado(self.estado.get(), idVenta)).place(x=200,y=120)
 
-		Label(frameCambiarEstadoWind, text = 'Estado', bg = '#8b9dc3').grid(row = 0, column = 0)
+		Label(frameCambiarEstadoWind, text = 'Estatus', bg = '#8b9dc3').grid(row = 0, column = 0)
 		self.estado = ttk.Combobox(frameCambiarEstadoWind, state="readonly")
 		self.estado["values"] = ["DESPACHADA","CERRADA"]
 		self.estado.grid(row = 1 , column = 0)	
@@ -721,6 +779,7 @@ class clienteVenta:
 	#Toma los valores dados en cambiarEstadoVenta y los aplica en la bd	
 	def editarEstado(self, estado, id):
 
+		#El condicional valida que el status sea valido 
 		if estado == 'DESPACHADA' or estado == 'CERRADA':
 			fecha = self.obtenerFeha()
 			query = 'UPDATE venta SET estado = ?, fecha_venta = ? WHERE id_venta = ?'
@@ -736,7 +795,11 @@ class clienteVenta:
 
 			Label(self.avisoEditar, text = 'La venta fue movida a "{}"'.format(estado), bg = '#8b9dc3').grid(row = 0, column = 0)	
 			tk.Button(self.avisoEditar, text = 'OK', bg = '#ccd2e6', command = lambda: self.avisoEditar.destroy()).grid(row = 1, column = 2)
-
+		else:
+			self.mensajeError = Label(self.cambiarEstadoWind, text = '¡Seleccione un status!', fg = 'black')
+			self.mensajeError.place(x=120, y=150)
+			self.mensajeError['bg'] = '#3b5998'			
+			return	
 #++++++++++++++++++++++++++++++++++++++     FUNCIONES PARA EL BOTON MOROSOS  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	#Verifica existen ventas en mora
 	def morosos(self):
@@ -758,7 +821,7 @@ class clienteVenta:
 		#Si existen clientes en mora aparecer el boton en la ventana principal del programa a modo de avio		
 		if(len(listaMoroso)>0):
 			#Boton para los morosos
-			tk.Button(self.wind, text = '¡¡¡MOROSOS!!!', bg = '#eb919a', command = lambda: self.morosoVentana(listaMoroso)).grid(row = 6, column = 8, columnspan = 3, sticky = W + E)	
+			tk.Button(self.wind, text = '¡¡¡MOROSOS!!!', bg = '#eb919a', command = lambda: self.morosoVentana(listaMoroso)).place(x = 130, y = 130 )
 		else:
 			return	
 
@@ -785,7 +848,7 @@ class clienteVenta:
 		self.tablaMoroso.heading('#2', text = 'Descripcion', anchor = CENTER)
 		self.tablaMoroso.heading('#3', text = 'Fecha', anchor = CENTER)
 		self.tablaMoroso.heading('#4', text = 'Deuda', anchor = CENTER)
-		self.tablaMoroso.heading('#5', text = 'Estado', anchor = CENTER)	
+		self.tablaMoroso.heading('#5', text = 'Estatus', anchor = CENTER)	
 
 		#Limpiar la tabla para ingresar los nuevos datos
 		records = self.tablaMoroso.get_children()
