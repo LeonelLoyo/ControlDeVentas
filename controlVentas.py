@@ -9,7 +9,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 
 class clienteVenta:
 
@@ -20,16 +21,20 @@ class clienteVenta:
 		self.wind.title('Control de Ventas')
 		self.wind.geometry('400x200')
 		self.wind['bg'] = '#3b5998'
+
 		#midnight blue
 		frameMain = LabelFrame(self.wind, text = 'Bienvenido al menu principal')
 		frameMain.grid(row = 3, column = 3, columnspan = 3, pady = 20)
 		frameMain['bg'] = '#8b9dc3'
 
+		#Esta funcion verifica si hay ventas en mora para darle aviso al usuario
+		self.morosos()
+
 		# Boton para ir a la seccion de clientes 
 		tk.Button(frameMain, text = 'Gestionar Clientes', bg = '#f7f7f7', command = self.gestionCliente).grid(row = 3, columnspan = 2, sticky = W + E)
 		#Boton para ir a la seccion de ventas 	
-		tk.Button(frameMain, text = 'Gestionar Ventas', bg = '#ccd2e6', command = self.gestionVenta).grid(row = 4, columnspan = 2, sticky = W + E)	
-
+		tk.Button(frameMain, text = 'Gestionar Ventas', bg = '#ccd2e6', command = self.gestionVenta).grid(row = 4, columnspan = 2, sticky = W + E)
+	
 #++++++++++++++++++++++++++++++++++++++++++++++++++++Gestion de clientes++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	
 	#Diseño / acciones del boton "Gestionar clientes"	
@@ -241,8 +246,8 @@ class clienteVenta:
 
 		#Boton para confirmar los cambios
 		tk.Button(self.editarclienteWind, text = '   Aceptar   ', bg = '#ccd2e6', command = lambda: self.updateCliente(self.cedulaPrueba.get(), self.nombrePrueba.get(), self.apellidoPrueba.get(), self.aliasPrueba.get(), self.telefonoPrueba.get(), self.direccionPrueba.get())).grid(row = 7, column = 4, sticky = W + E)
-		self.editarclienteWind.mainloop()
 
+	#Organiza los parametros en una tupla y se procede a ejecutar la consulta	
 	def updateCliente(self, cedula, nombre, apellido, alias, telefono, direccion):
 		#Preparar parametros para la actualizacion
 		parametros = (cedula, 
@@ -301,11 +306,7 @@ class clienteVenta:
 		self.ventaWind.title('Gestion de Ventas')
 		self.ventaWind.geometry('400x200')
 		self.ventaWind['bg'] = '#3b5998'
-		"""
-		bg = 'alice blue',
-		, bg = '#f7f7f7'
-		, bg = '#ccd2e6'
-		"""
+
 		frameGestionVenta = LabelFrame(self.ventaWind, text = 'Bienvenido al menu principal')
 		frameGestionVenta.grid(row = 3, column = 3, columnspan = 3, pady = 20)
 		frameGestionVenta['bg'] = '#8b9dc3'
@@ -379,7 +380,6 @@ class clienteVenta:
 		#Tema de la tabla
 		s = ttk.Style()
 		s.theme_use('clam')
-		
 		#DEclaracion y diseño de la tabla que contendrá los datos d elos clientes 
 		self.tablaSelecCliente = ttk.Treeview(self.selecCliente, height = 10, columns = ('#0', '#1'))
 		self.tablaSelecCliente.grid(row = 0, column = 0, columnspan = 6)
@@ -505,7 +505,7 @@ class clienteVenta:
 		self.ventaCerradaWind['bg'] = '#3b5998'
 
 		#Boton para cerrar la ventana (unico boton de esta seccion (Por ahora))
-		tk.Button(self.ventaCerradaWind, text = 'Salir', bg = '#eb919a', command = self.cerrarCerradas).grid(row = 9, column = 5, sticky = W + E)	
+		tk.Button(self.ventaCerradaWind, text = 'Salir', bg = '#eb919a', command = lambda: self.ventaCerradaWind.destroy()).grid(row = 9, column = 5, sticky = W + E)	
 		#Tema de la tabla
 		s = ttk.Style()
 		s.theme_use('clam')
@@ -536,17 +536,13 @@ class clienteVenta:
 		for fila in resul:
 			self.tablaVentaCerrada.insert('', 0, text = fila[0], values = (fila[1], fila[2], fila[3], fila[4], fila[5], fila[6]))
 
-	#Accion de boton de salir para a ventana de consultar ventas cerradas		
-	def cerrarCerradas(self):
-		self.ventaCerradaWind.destroy()		
-
 	#Ventana para consultar las ventas por despachar y vaciarlas en una tabla	
 	def ventasPorDespachar(self):
 		self.ventaPorDespacharWind = Toplevel()
 		self.ventaPorDespacharWind.title("Ventas Por Despachar")
 		self.ventaPorDespacharWind['bg'] = '#3b5998'
 
-		tk.Button(self.ventaPorDespacharWind, text = 'Salir', bg = '#eb919a', command = self.cerrarPorDespachar).grid(row = 9, column = 5, sticky = W + E)	
+		tk.Button(self.ventaPorDespacharWind, text = 'Salir', bg = '#eb919a', command = lambda: self.ventaPorDespacharWind.destroy()).grid(row = 9, column = 5, sticky = W + E)	
 		tk.Button(self.ventaPorDespacharWind, text = 'Cambiar estado de la venta', bg = '#ccd2e6', command = self.cambiarEstadoVenta).grid(row = 9, column = 4, sticky = W + E)
 		
 		#Tema de la tabla
@@ -580,9 +576,6 @@ class clienteVenta:
 		for fila in resul:
 			self.tablaVentaPorDespachar.insert('', 0, text = fila[0], values = (fila[1], fila[2], fila[3], fila[4], fila[5], fila[6]))	
 
-	#Accion de boton de salir para a ventana de consultar ventas por despachar		
-	def cerrarPorDespachar(self):
-		self.ventaPorDespacharWind.destroy()
 
 	#Ventana para consultar las ventas abiertas y vaciarlas en una tabla	
 	def ventasAbiertas(self):
@@ -590,7 +583,7 @@ class clienteVenta:
 		self.ventaAbiertaWind.title("Ventas Despachadas")
 		self.ventaAbiertaWind['bg'] = '#3b5998'
 
-		tk.Button(self.ventaAbiertaWind, text = 'Salir', bg = '#eb919a', command = self.cerrarAbiertas).grid(row = 9, column = 5, sticky = W + E)	
+		tk.Button(self.ventaAbiertaWind, text = 'Salir', bg = '#eb919a', command = lambda: self.ventaAbiertaWind.destroy()).grid(row = 9, column = 5, sticky = W + E)	
 		tk.Button(self.ventaAbiertaWind, text = 'Abono', bg = '#ccd2e6', command= self.abonar).grid(row = 9, column = 4, sticky = W + E)
 
 		#Tema de la tabla
@@ -621,13 +614,9 @@ class clienteVenta:
 		for elemento in records:
 			self.tableVentaAbierta.delete(elemento)
 		#ingresando los datos nuevos
-		#EL campo 7 de value aunque no se muestre, guarda el id de la venta para facilitar su busqueda al momento de hacer el abono
 		for fila in resul:
 			self.tableVentaAbierta.insert('', 0, text = fila[0], values = (fila[1], fila[2], fila[3], fila[4], fila[5], fila[6]))	
 
-	#Accion de boton de salir para a ventana de consultar ventas Abiertas	
-	def cerrarAbiertas(self):
-		self.ventaAbiertaWind.destroy()	
 
 	#Crea una ventana comoda para realizar un abono a una venta seleccionada	
 	def abonar(self):
@@ -701,11 +690,7 @@ class clienteVenta:
 			self.aviso['bg'] = '#3b5998'	
 
 			Label(self.aviso, text = 'EL cliente pago la totalidad de la deuda, La venta fue movida a "Ventas cerradas"', bg = '#8b9dc3').grid(row = 0, column = 0)	
-			tk.Button(self.aviso, text = 'OK', bg = '#ccd2e6', command = self.cerrarAviso).grid(row = 1, column = 2)
-
-	#Funcionalidad del boton de la ventana de aviso que informa que la venta se movio a la seccion seleccionada 		
-	def cerrarAviso(self):
-		self.aviso.destroy()	
+			tk.Button(self.aviso, text = 'OK', bg = '#ccd2e6', command = lambda: self.aviso.destroy()).grid(row = 1, column = 2)
 
 
 	#Cambiar una venta por despachar a cerrada o abierta 	
@@ -750,11 +735,66 @@ class clienteVenta:
 			self.avisoEditar['bg'] = '#3b5998'	
 
 			Label(self.avisoEditar, text = 'La venta fue movida a "{}"'.format(estado), bg = '#8b9dc3').grid(row = 0, column = 0)	
-			tk.Button(self.avisoEditar, text = 'OK', bg = '#ccd2e6', command = self.cerrarAvisoEditar).grid(row = 1, column = 2)
+			tk.Button(self.avisoEditar, text = 'OK', bg = '#ccd2e6', command = lambda: self.avisoEditar.destroy()).grid(row = 1, column = 2)
 
-	#Funcionalidad del boton para cerrar la ventana emergente 	
-	def cerrarAvisoEditar(self):
-		self.avisoEditar.destroy()			
+#++++++++++++++++++++++++++++++++++++++     FUNCIONES PARA EL BOTON MOROSOS  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	#Verifica existen ventas en mora
+	def morosos(self):
+
+		#Consulta para traer todas las ventas en estado ABIERTAS
+		query = 'SELECT v.id_venta, c.cedula, c.nombre, v.descripcion, v.fecha_venta, v.deuda, v.estado FROM cliente AS c JOIN venta AS v ON c.id_cliente = v.id_clientev WHERE v.estado = ?'
+		parametro = ('DESPACHADA',)
+		resul = self.runQuery(query, parametro)
+
+		#lista para guardar las ventas en mora (5 dias o mas despachadas y sin pagar)
+		listaMoroso = list()
+		#obtener la fecha de hoy y ponerla en el formato correcto para poder hacer la resta
+		fechaHoy = datetime.strptime(self.obtenerFeha(), '%d/%m/%Y')
+		#Llenando de la lista con las venta que cumplen la condicion de mora
+		for fila in resul:
+			fechaC = datetime.strptime(fila[4], '%d/%m/%Y')
+			if (fechaHoy-fechaC)/timedelta(days=1) >= 5:
+				listaMoroso.append(fila)
+		#Si existen clientes en mora aparecer el boton en la ventana principal del programa a modo de avio		
+		if(len(listaMoroso)>0):
+			#Boton para los morosos
+			tk.Button(self.wind, text = '¡¡¡MOROSOS!!!', bg = '#eb919a', command = lambda: self.morosoVentana(listaMoroso)).grid(row = 6, column = 8, columnspan = 3, sticky = W + E)	
+		else:
+			return	
+
+	#Ventana para llenar las ventas que estan en mora			
+	def morosoVentana(self, listaMoroso):
+		self.morosoWind = Toplevel()
+		self.morosoWind.title('Lista de Morosos')	
+		self.morosoWind['bg'] = '#3b5998'
+
+		#Boton de salir de la ventana
+		tk.Button(self.morosoWind, text = 'SALIR', bg = '#eb919a', command = lambda: self.morosoWind.destroy()).grid(row = 2, column = 5, sticky = W + E)
+		
+		#Descricpcion de la ventana moroso
+		Label(self.morosoWind, text = 'Los clientes en esta lista tienen 5 o mas dias sin cancelar su deuda', bg = '#8b9dc3').grid(row = 0, column = 0)
+		#Tema de la tabla
+		s = ttk.Style()
+		s.theme_use('clam')
+
+		#DEclaracion y diseño de la tabla que contendrá los datos de las ventas abiertas  
+		self.tablaMoroso = ttk.Treeview(self.morosoWind, height = 15, columns = ('#0', '#1', '#2', '#3', '#4'))
+		self.tablaMoroso.grid(row = 1, column = 0, columnspan = 6)
+		self.tablaMoroso.heading('#0', text = 'Cedula', anchor = CENTER)
+		self.tablaMoroso.heading('#1', text = 'Nombre', anchor = CENTER)
+		self.tablaMoroso.heading('#2', text = 'Descripcion', anchor = CENTER)
+		self.tablaMoroso.heading('#3', text = 'Fecha', anchor = CENTER)
+		self.tablaMoroso.heading('#4', text = 'Deuda', anchor = CENTER)
+		self.tablaMoroso.heading('#5', text = 'Estado', anchor = CENTER)	
+
+		#Limpiar la tabla para ingresar los nuevos datos
+		records = self.tablaMoroso.get_children()
+		for elemento in records:
+			self.tablaMoroso.delete(elemento)
+		#ingresando los datos nuevos
+		for fila in listaMoroso:
+			self.tablaMoroso.insert('', 0, text = fila[1], values = (fila[2], fila[3], fila[4], fila[5], fila[6]))
+
 
 #++++++++++++++++++++++++++++++++++++++     Funciones en comun para ambas gestiones++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
